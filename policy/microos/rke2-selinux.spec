@@ -19,15 +19,14 @@ restorecon -R /var/run/flannel
 %define container_policyver 2.164.2-1.1
 
 Name:       rke2-selinux
-Version:    %{rke2_selinux_version}
-Release:    %{rke2_selinux_release}.sle
+Version:    0.9.stable.1
+Release:    0
 Summary:    SELinux policy module for rke2
 
 Group:      System Environment/Base
-License:    ASL 2.0
-URL:        https://rke2.io
-Source0:    rke2.pp
-Source1:    rke2.if
+License:    Apache-2.0
+URL:        https://github.com/rancher/rke2-selinux
+Source:     %{name}-%{version}.tar.gz
 
 BuildArch:      noarch
 BuildRequires:  container-selinux >= %{container_policyver}
@@ -48,11 +47,18 @@ Conflicts: k3s-selinux
 %description
 This package installs and sets up the SELinux policy security module for rke2.
 
+%prep
+%setup -q
+
+%build
+cd policy/microos
+make -f /usr/share/selinux/devel/Makefile rke2.pp
+
 %install
 install -d %{buildroot}%{_datadir}/selinux/packages
-install -m 644 %{SOURCE0} %{buildroot}%{_datadir}/selinux/packages
+install -m 644 policy/microos/rke2.pp %{buildroot}%{_datadir}/selinux/packages
 install -d %{buildroot}%{_datadir}/selinux/devel/include/contrib
-install -m 644 %{SOURCE1} %{buildroot}%{_datadir}/selinux/devel/include/contrib/
+install -m 644 policy/microos/rke2.if %{buildroot}%{_datadir}/selinux/devel/include/contrib/
 install -d %{buildroot}/etc/selinux/targeted/contexts/users/
 
 %pre
